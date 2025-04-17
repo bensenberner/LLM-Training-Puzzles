@@ -54,7 +54,7 @@ weights, opt_states, activations, grad_activations, grad_weights = model.storage
 # We begin by tracing the lifecycle of a single model update.
 
 # Get the input activations to the model for batches 2, 3 
-activations[0] = model.get_activation(batches=[2, 3])
+activations[0] = model.get_initial_activation(batches=[2, 3])
 activations[0]
 
 # Load the weights (random) for layers 0 and 1
@@ -147,7 +147,7 @@ def basic(model: Model) -> Model:
         weights[l], opt_states[l] = model.load_weights(l)
 
     # Load the input layer activations
-    activations[0] = model.get_activation(range(model.BATCHES))
+    activations[0] = model.get_initial_activation(range(model.BATCHES))
 
     ## USER CODE
     # Forward
@@ -204,7 +204,7 @@ def grad_accum(model: Model) -> Model:
     ## USER CODE
     for r in range(model.BATCHES):
         # Load the input layer activations
-        activations[0, r] = model.get_activation([r])
+        activations[0, r] = model.get_initial_activation([r])
 
         ## USER CODE
         # Forward
@@ -287,7 +287,7 @@ async def ddp(model: Model) -> Model:
     # Storage on device.
     weights, opt_states, activations, grad_activations, grad_weights = model.storage()
     # Load all the activations
-    model.activations[0] = model.get_activation([model.rank])
+    model.activations[0] = model.get_initial_activation([model.rank])
 
     ## USER CODE
 
@@ -367,7 +367,7 @@ async def wsdp(model: Model) -> Model:
     weights, opt_states, activations, grad_activations, grad_weights = model.storage()
 
     # Load all the activations
-    model.activations[0] = model.get_activation([model.rank])
+    model.activations[0] = model.get_initial_activation([model.rank])
 
     # Load a shard of the weights for every layer. Load in the full optimizer states
     for l in range(model.LAYERS):
@@ -450,7 +450,7 @@ async def fsdp(model: Model) -> Model:
     weights, opt_states, activations, grad_activations, grad_weights = model.storage()
 
     # Load all the activations
-    model.activations[0] = model.get_activation([model.rank])
+    model.activations[0] = model.get_initial_activation([model.rank])
 
     # Load a shard of the weights for every layer. Load in the full weights
     for l in range(model.LAYERS):
@@ -533,7 +533,7 @@ async def pipeline(model: Model) -> Model:
     ## USER CODE
 
     if model.rank == 0:
-        activations[0] = model.get_activation(range(model.BATCHES))
+        activations[0] = model.get_initial_activation(range(model.BATCHES))
     else:
         activations[my_layers[0]] = await model.receive()
 
@@ -599,7 +599,7 @@ async def gpipe(model: Model) -> Model:
     for mb in range(model.BATCHES):
         # Forward
         if model.rank == 0:
-            activations[0, mb] = model.get_activation([mb])
+            activations[0, mb] = model.get_initial_activation([mb])
         else:
             activations[my_layers[0], mb] = await model.receive()
 
@@ -676,7 +676,7 @@ async def pipeline_fsdp(model: Model) -> Model:
     for l in range(model.LAYERS):        
         if l == my_layers[0]:
             if model.rank % 4 == 0:
-                activations[0] = model.get_activation([model.rank // 4])
+                activations[0] = model.get_initial_activation([model.rank // 4])
             else:
                 activations[l] = await model.receive()
     

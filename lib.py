@@ -346,7 +346,7 @@ class Model:
     def set_final_weight(self, layer: int, weight:Weight) -> None:
         self.final_weights[layer] = weight
 
-    def get_activation(self, batches: Sequence[int]) -> Activation:
+    def get_initial_activation(self, batches: Sequence[int]) -> Activation:
         return Activation(0, self.LAYERS, frozenset(batches), self.BATCHES)
 
     def forward(self, layer: int, inp: Activation, weight: Weight) -> Activation:
